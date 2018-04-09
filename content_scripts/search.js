@@ -102,6 +102,9 @@ Search.nextResult = function(reverse) {
   case 'markOptions':
     Command.input.value = Command.input.value.replace(/-[a-zA-Z]*$/, Command.completionResults[this.index][1]);
     break;
+  case 'functions':
+    Command.input.value = Command.input.value.match(/^\S+/)[0] + ' ' + Command.completionResults[this.index][1];
+    break;
   case 'sessions':
     Command.input.value = Command.input.value.match(/^\S+/)[0] + ' ' + Command.completionResults[this.index][1];
     break;

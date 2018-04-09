@@ -382,6 +382,25 @@ Command.callCompletionFunction = (function() {
     self.updateCompletions();
   };
 
+  var callFunctionsCompletion = function() {
+    self.completions = {
+      functions: Object.keys(settings.FUNCTIONS).filter(function(e) {
+        var regexp;
+        var isValidRegex = true;
+        try {
+          regexp = new RegExp(search, 'i');
+        } catch (ex) {
+          isValidRegex = false;
+        }
+        if (isValidRegex) {
+          return regexp.test(e);
+        }
+        return e.substring(0, search.length) === search;
+      })
+    };
+    self.updateCompletions();
+  };
+
   return function(value) {
     search = value.replace(/^(chrome:\/\/|\S+ +)/, '');
     var baseCommand = (value.match(/^\S+/) || [null])[0];
@@ -464,6 +483,9 @@ Command.callCompletionFunction = (function() {
         self.completions.bookmarks = response;
         self.updateCompletions();
       });
+      return true;
+    case 'call':
+      callFunctionsCompletion(value);
       return true;
     }
     return false;

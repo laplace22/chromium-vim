@@ -47,6 +47,11 @@ var scrollingElement = (function() {
     clickFocus = false;
   };
 
+  window.setScrollFocus = function(elem) {
+    clickFocus = true;
+    lastActiveElem = elem;
+  };
+
   document.addEventListener('mousedown', function(event) {
     if (!event.isTrusted)
       return true;
