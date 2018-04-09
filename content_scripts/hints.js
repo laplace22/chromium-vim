@@ -237,7 +237,20 @@ Hints.showLinkInfo = function(hint) {
   return true;
 };
 
-Hints.handleHintFeedback = function() {
+Hints.makeMigemoString = async function(query) {
+  return new Promise(function(resolve, reject) {
+    chrome.runtime.sendMessage(
+      'lepjdlpipcoalclmjdmpfdgaeaeaihob'
+      ,{"action": "getRegExpString", "query": query}
+      ,{}
+      ,function(result){
+        resolve(result);
+      }
+    );
+  });
+}
+
+Hints.handleHintFeedback = async function() {
   var linksFound = 0,
       index,
       link,
@@ -268,11 +281,18 @@ Hints.handleHintFeedback = function() {
       }
     }
   } else {
-    var containsNumber, validMatch, stringNum, string;
+    var containsNumber, validMatch, stringNum, string, migemoRegExp;
     Hints.numericMatch = null;
     this.currentString = this.currentString.toLowerCase();
     string = this.currentString;
     containsNumber = /\d+$/.test(string);
+    if (settings.migemohints){
+      var migemoString=await Hints.makeMigemoString(string.replace(/.*\d/g, ''));
+      migemoRegExp=new RegExp(migemoString.result, 'i')
+    } else {
+      migemoRegExp=new RegExp("", 'i')
+    }
+
     if (containsNumber) {
       stringNum = this.currentString.match(/[0-9]+$/)[0];
     }
@@ -291,7 +311,9 @@ Hints.handleHintFeedback = function() {
       if (settings.typelinkhints) {
         if (containsNumber && link.textContent.indexOf(stringNum) === 0) {
           validMatch = true;
-        } else if (!containsNumber && this.linkArr[i][2].toLowerCase().indexOf(string.replace(/.*\d/g, '')) !== -1) {
+        } else if (!containsNumber && !settings.migemohints && this.linkArr[i][2].toLowerCase().indexOf(string.replace(/.*\d/g, '')) !== -1){
+          validMatch = true;
+        } else if (!containsNumber && settings.migemohints && migemoRegExp.test(this.linkArr[i][2])){
           validMatch = true;
         }
       } else if (link.textContent.indexOf(string) === 0) {

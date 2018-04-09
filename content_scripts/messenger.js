@@ -286,7 +286,7 @@ chrome.extension.onMessage.addListener(function(request, sender, callback) {
     }
     break;
   case 'echoRequest':
-    if (!window.isCommandFrame && document.hasFocus()) {
+    if (!window.isCommandFrame) {
       switch (request.call) {
       case 'callMapFunction':
         Mappings.actions[request.name](1);
