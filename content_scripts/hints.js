@@ -244,7 +244,7 @@ Hints.makeMigemoString = async function(query) {
       ,{"action": "getRegExpString", "query": query}
       ,{}
       ,function(result){
-        resolve(result);
+        resolve(result.result);
       }
     );
   });
@@ -287,10 +287,31 @@ Hints.handleHintFeedback = async function() {
     string = this.currentString;
     containsNumber = /\d+$/.test(string);
     if (settings.migemohints){
-      var migemoString=await Hints.makeMigemoString(string.replace(/.*\d/g, ''));
-      migemoRegExp=new RegExp(migemoString.result, 'i')
-    } else {
-      migemoRegExp=new RegExp("", 'i')
+      var migemoStrings = await Promise.all(
+        string.
+        replace(/\d/g, '').
+        trim().
+        split(/\s+/).
+        map((i)=>{return Hints.makeMigemoString(i)})
+      );
+      if(migemoStrings.length==1){
+        migemoRegExp=new RegExp(migemoStrings[0], 'i')
+      }else{
+        var generatePermutation = function(perm, pre, post, n) {
+          var elem, i, rest, len;
+          if (n > 0)
+            for (i = 0, len = post.length; i < len; ++i) {
+              rest = post.slice(0);
+              elem = rest.splice(i, 1);
+              generatePermutation(perm, pre.concat(elem), rest, n - 1);
+            }
+          else
+            perm.push(pre);
+        };
+        var perm=[];
+        generatePermutation(perm, [], migemoStrings, migemoStrings.length);
+        migemoRegExp=new RegExp( "(?:"+ perm.map((i)=>{ return "(?:"+i.join(').*(?:')+")" }).join(")|(?:")+ ")", 'i');
+      }
     }
 
     if (containsNumber) {
