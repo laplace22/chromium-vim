@@ -66,6 +66,7 @@
     "downloads.shelf",
     "clipboardRead",
     "clipboardWrite",
+    "nativeMessaging",
     "webNavigation"
   ],
   "background": {

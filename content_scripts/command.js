@@ -916,6 +916,21 @@ Command.execute = function(value, repeats) {
     return;
   }
 
+  if (/^sendNativeMessage\b/.test(value)) {
+    chrome.runtime.sendNativeMessage(
+      'winactivatebypid'
+      ,{"hello": "world"}
+      ,function(result){
+        if (chrome.runtime.lastError) {
+          console.log("ERROR: " + chrome.runtime.lastError.message);
+        } else {
+          console.log(result);
+        }
+      }
+    );
+    return;
+  }
+
   if (/^script +/.test(value)) {
     RUNTIME('runScript', {code: value.slice(7)});
   }
