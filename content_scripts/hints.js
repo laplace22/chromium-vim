@@ -237,47 +237,6 @@ Hints.showLinkInfo = function(hint) {
   return true;
 };
 
-Hints.makeMigemoString = async function(query) {
-  return new Promise(function(resolve, reject) {
-    chrome.runtime.sendMessage(
-      'lepjdlpipcoalclmjdmpfdgaeaeaihob'
-      ,{"action": "getRegExpString", "query": query}
-      ,{}
-      ,function(result){
-        resolve(result.result);
-      }
-    );
-  });
-}
-
-Hints.makeMigemoRegExp = async function(string) {
-  var migemoStrings = await Promise.all(
-    string.
-    replace(/\d/g, '').
-    trim().
-    split(/\s+/).
-    map((i)=>{return this.makeMigemoString(i)})
-  );
-  if(migemoStrings.length==1){
-    return new RegExp(migemoStrings[0], 'i');
-  }else{
-    var generatePermutation = function(perm, pre, post, n) {
-      var elem, i, rest, len;
-      if (n > 0)
-        for (i = 0, len = post.length; i < len; ++i) {
-          rest = post.slice(0);
-          elem = rest.splice(i, 1);
-          generatePermutation(perm, pre.concat(elem), rest, n - 1);
-        }
-      else
-        perm.push(pre);
-    };
-    var perm=[];
-    generatePermutation(perm, [], migemoStrings, migemoStrings.length);
-    return new RegExp( "(?:"+ perm.map((i)=>{ return "(?:"+i.join(').*(?:')+")" }).join(")|(?:")+ ")", 'i');
-  }
-}
-
 Hints.handleHintFeedback = async function() {
   var linksFound = 0,
       index,
@@ -315,7 +274,7 @@ Hints.handleHintFeedback = async function() {
     string = this.currentString;
     containsNumber = /\d+$/.test(string);
     if (settings.migemohints){
-      migemoRegExp = await this.makeMigemoRegExp(string);
+      migemoRegExp = await Utils.makeMigemoRegExp(string);
     }
 
     if (containsNumber) {

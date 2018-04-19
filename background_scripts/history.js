@@ -79,18 +79,44 @@ var History = {
     };
   })(),
 
-  retrieveSearchHistory: function(search, limit, callback) {
+  searchMigemo: async function(opt) {
+    var search = await Utils.makeMigemoRegExp(opt.search);
+    var fn = opt.fn || function(item) { return item; };
+    var matches = [];
+    eachUntil(opt.array, function(item) {
+      if(search.test(fn(item))){
+        matches.push(item);
+        return matches.length === opt.limit;
+      }
+      return false;
+    });
+    return matches;
+  },
+
+  retrieveSearchHistory: async function(search, limit, callback) {
     if (History.shouldRefresh) {
       History.refreshStore();
     }
-    callback(searchArray({
-      array: this.historyStore,
-      search: search,
-      limit: limit,
-      fn: function(item) {
-        return item.title + ' ' + item.url;
-      }
-    }), true);
+    if(settings.migemosearchhistory) {
+      var result = await this.searchMigemo({
+        array: this.historyStore,
+        search: search,
+        limit: limit,
+        fn: function(item) {
+          return item.title + ' ' + item.url;
+        }
+      });
+      callback(result , true);
+    }else {
+      callback(searchArray({
+        array: this.historyStore,
+        search: search,
+        limit: limit,
+        fn: function(item) {
+          return item.title + ' ' + item.url;
+        }
+      }), true);
+    }
   }
 
 };
