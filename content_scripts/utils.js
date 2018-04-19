@@ -243,7 +243,7 @@ var searchArray = function(opt) {
     var text = fn(item).split(split);
     if (search.every(function(searchTerm) {
       return text.some(function(textTerm) {
-        return textTerm.toLowerCase().indexOf(searchTerm) !== -1;
+        return textTerm.toLowerCase().indexOf(searchTerm) === 0;
       });
     })) {
       matches.push(item);
