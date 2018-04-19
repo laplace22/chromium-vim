@@ -427,6 +427,22 @@ Hints.handleHint = function(key) {
   }
 };
 
+Hints.getDisplayedText = function(node) {
+  if(node.nodeType === node.TEXT_NODE){
+    return node.textContent;
+  } else if (node.nodeType === node.ELEMENT_NODE){
+    let nodeStyle=window.getComputedStyle(node);
+    if(nodeStyle.display==="none" || nodeStyle.transition!=="all 0s ease 0s"){
+      return "";
+    }
+    let children=node.childNodes;
+    let result="";
+    children.forEach((child)=>{result+=this.getDisplayedText(child);})
+    return result;
+  }
+  return "";
+}
+
 Hints.evaluateLink = function(item) {
   this.linkIndex += 1;
   var node = item.node;
@@ -449,10 +465,13 @@ Hints.evaluateLink = function(item) {
       if (node.firstElementChild && node.firstElementChild.alt) {
         textValue = node.firstElementChild.alt;
         alt = textValue;
+        alt = alt.length > 13 ? alt.slice(0, 10) + "..." : alt;
       } else {
         textValue = node.textContent || node.value || node.alt || '';
-        alt = node.title || '';
-        alt = alt.length > 13 ? alt.slice(0, 10) + "..." : alt;
+        if(/^[\s\n]*$/.test(this.getDisplayedText(node))){
+          alt = node.title || '';
+          alt = alt.length > 13 ? alt.slice(0, 10) + "..." : alt;
+        }
       }
       item.text = textValue;
       this.linkArr.push([hint, node, textValue, alt]);
